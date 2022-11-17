@@ -1,10 +1,8 @@
 package engine;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Scanner;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class Word {
     public static Set<String> stopWords = new HashSet<>();
@@ -112,103 +110,220 @@ public class Word {
         return true;
     }
 
-
-    public void testprefix(String rawText) {
-        // Check valid of text part
-
-        String text = "";
-        String suffix = "";
-
-
-        for (int i = 0; i < rawText.length(); i++) {
-//            if ((Character.isLetterOrDigit(rawText.charAt(i)) || rawText.charAt(i) == '-' || rawText.charAt(i) == '\'')) {
-////                if (Character.toString(rawText.charAt(i)) == "s")
-//                text += rawText.charAt(i);
-//            }
-
-
-            if (!Character.isLetterOrDigit(rawText.charAt(i))) {
-                if (rawText.charAt(i) == '-') {
-                    text += rawText.charAt(i);
-                }
-                if (rawText.charAt(i) == '\'') {
-                    if (rawText.charAt(i+1) == 's') {
-                        suffix += Character.toString(rawText.charAt(i)) + rawText.charAt(i+1);
-
-                        for (int j = i+1; j < rawText.length() ; j++) {
-                            if (!Character.isLetterOrDigit(rawText.charAt(j))) {
-                                suffix += rawText.charAt(j);
-                            }
-                        }
-                    }
-                    if (rawText.charAt(i+1) == 't'){
-                        text += Character.toString(rawText.charAt(i)) + rawText.charAt(i+1);
-                    }
-                }
-            }
-
-            if (Character.isLetter(rawText.charAt(i))) {
-                if (suffix.length() == 0 ) {
-                    text += rawText.charAt(i);
-
-                }
-            }
-        }
-        System.out.println(!Character.isLetterOrDigit(rawText.charAt(rawText.length() - 1)));
-        System.out.println(text);
-        System.out.println(suffix);
-
-    }
-    public static Word createWord(String rawText) {
+    public void test(String rawText) {
         String prefix = "";
-        String suffix = "";
         String text = "";
+        String suffix = "";
+
+
         int index = 0;
         for (int i = 0 ;i < rawText.length(); i++) {
             if (!Character.isLetterOrDigit(rawText.charAt(i))) {
                 prefix += rawText.charAt(i);
             }
+            if (Character.isLetterOrDigit(rawText.charAt(i))) {
+                break;
+            }
         }
-        if (prefix.length() != 0) {
-            index = prefix.length() - 1;
+
+        if (prefix.length() != 0 ) {
+            if (prefix.length() != 1) {
+                index = prefix.length() -1;
+            }
+            else {
+                index = prefix.length();
+
+            }
         }
-        for (int i = index; i < rawText.length() ; i++) {
+        for (int i = index; i < rawText.length(); i++) {
             if (Character.isDigit(rawText.charAt(i))) {
-                return new Word(prefix,rawText,suffix);
+
+//                return null;
+                break;
+            }
+            if (rawText.charAt(i) == '\'') {
+                if (rawText.charAt(i +1) == 's') {
+                    continue;
+                }
+
+                else {
+                    text = rawText.substring(index,i+2);
+                    suffix = rawText.substring(i+2);
+//                    return new Word(prefix,text,suffix);
+                    break;
+                }
             }
 
+            if (rawText.charAt(i) == '-') {
+//                text = rawText.substring(index)
+                if (!Character.isLetter(rawText.charAt(i+1))) {
+                    text = rawText.substring(index, i +1);
+                    suffix = rawText.substring(i+1);
+
+                }
+                else {
+                    text = rawText.substring(index);
+                }
+
+            }
+
+            if (!Character.isLetter(rawText.charAt(i))) {
+
+            }
+
+        }
+
+        System.out.println("prefix " + prefix);
+        System.out.println("text " + text);
+        System.out.println("suffix " + suffix);
+
+    }
 
 
-            if (rawText.charAt(i) == '\'') {
-                if (rawText.charAt(i+1) == 's') {
-                    suffix += Character.toString(rawText.charAt(i)) + rawText.charAt(i+1);
+    public void testprefix(String rawTextt) {
+        int startIndex = 0;
 
-                    for (int j = i+1; j < rawText.length() ; j++) {
-                        if (!Character.isLetterOrDigit(rawText.charAt(j))) {
-                            suffix += rawText.charAt(j);
+        String prefixx = "";
+        String suffixx = "";
+        String textt = "";
+        int index = 0;
+        for (int i = 0 ;i < rawTextt.length(); i++) {
+            if (!Character.isLetterOrDigit(rawTextt.charAt(i))) {
+                prefixx += rawTextt.charAt(i);
+                index ++;
+            }
+            if (Character.isLetterOrDigit(rawTextt.charAt(i))) {
+//
+                break;
+            }
+        }
+//        if (prefixx.length() != 0) {
+//            index = prefixx.length() - 1;
+//        }
+        for (int i = index; i < rawTextt.length() ; i++) {
+            if (Character.isDigit(rawTextt.charAt(i))) {
+                break;
+            }
+            if (!Character.isLetterOrDigit(rawTextt.charAt(i))) {
+                if (rawTextt.charAt(i) == '\'') {
+
+                    if (rawTextt.charAt(i+1) == 's') {
+//                        suffixx += Character.toString(rawTextt.charAt(i)) + rawTextt.charAt(i+1);
+//                        startIndex =1;
+//
+//                        for (int j = i+1; j < rawTextt.length() ; j++) {
+//                            if (!Character.isLetterOrDigit(rawTextt.charAt(j))) {
+//                                suffixx += rawTextt.charAt(j);
+//                            }
+//                        }
+
+                        textt = rawTextt.substring(index, i);
+                        suffixx = rawTextt.substring(i,rawTextt.length() -1);
+
+                    }
+                    if (rawTextt.charAt(i+1) != 's'){
+                        ArrayList<Character> list = new ArrayList<>();
+                        list.add(rawTextt.charAt(i));
+                        for (int j = i+1; j < rawTextt.length() ; j++) {
+                            if (Character.isLetter(rawTextt.charAt(j)) && rawTextt.charAt(j) != 's') {
+                                list.add(rawTextt.charAt(j));
+                                System.out.println(34);
+                            }
+                        }
+                        System.out.println(list.size());
+
+                        textt  = rawTextt.substring(index,i);
+                        for (Character c: list) {
+                            textt += c;
                         }
                     }
+                }  if (rawTextt.charAt(i) == '-') {
+                    textt += rawTextt.charAt(i);
                 }
-                if (rawText.charAt(i+1) == 't'){
-                    text += Character.toString(rawText.charAt(i)) + rawText.charAt(i+1);
-                }
+
+//                else {
+//                    suffixx += rawTextt.charAt(i);
+//                }
             }
 
+//             if(  startIndex != 1 && !Character.isLetterOrDigit(rawTextt.charAt(i))) {
+//                suffixx += rawTextt.charAt(i);
+//
+//
+//            }
+//             if(Character.isLetter(rawTextt.charAt(i)) && startIndex != 1) {
+//                textt += rawTextt.charAt(i);
+//
+//            }
 
-            if (Character.isLetter(rawText.charAt(i))) {
-                text += rawText.charAt(i);
 
-            }
 
 
         }
+        // ceck valid word of valid word
+        System.out.println("prefix: " +  prefixx);
+        System.out.println("Text: " + textt);
+        System.out.println("suffix: " +  suffixx);
+
+    }
+    public static Word createWord(String rawText) {
+        String prefix = "";
+        String text = "";
+        String suffix = "";
 
 
+        int index = 0;
+        for (int i = 0 ;i < rawText.length(); i++) {
+            if (!Character.isLetterOrDigit(rawText.charAt(i))) {
+                prefix += rawText.charAt(i);
+            }
+            if (Character.isLetterOrDigit(rawText.charAt(i))) {
+                break;
+            }
+        }
 
+        if (prefix.length() != 0 ) {
+            if (prefix.length() != 1) {
+                index = prefix.length() -1;
+            }
+            else {
+                index = prefix.length();
 
+            }
+        }
+        for (int i = index; i < rawText.length(); i++) {
+            if (Character.isDigit(rawText.charAt(i))) {
 
-        // check valid word of valid word
-        return null;
+                return null;
+            }
+            if (rawText.charAt(i) == '\'') {
+                if (rawText.charAt(i +1) == 's') {
+                    continue;
+                }
+
+                else {
+                    text = rawText.substring(index,i);
+                    suffix = rawText.substring(i);
+                    return new Word(prefix,text,suffix);
+                }
+            }
+
+            if (rawText.charAt(i) == '-') {
+//                text = rawText.substring(index)
+                if (!Character.isLetter(rawText.charAt(i+1))) {
+                    text = rawText.substring(index, i +1);
+                    suffix = rawText.substring(i+1);
+
+                }
+                else {
+                    text = rawText.substring(index);
+                }
+
+            }
+
+        }
+//        text = rawText.substring(index);
+        return new Word(prefix, text, suffix);
 
     }
 
