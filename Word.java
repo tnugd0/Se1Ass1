@@ -166,9 +166,9 @@ public class Word {
                 }
 
             }
-
+            
             if (!Character.isLetter(rawText.charAt(i))) {
-
+                
             }
 
         }
