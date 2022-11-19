@@ -2,9 +2,13 @@ package engine;
 
 import java.util.List;
 
-public class Result {
+public class Result implements Comparable<Result> {
     private Doc d;
     private List<Match> matches;
+    private int mathCount = matches.size();
+    private int totalFrequency;
+    private int averagefirstindex;
+
 
     public Result(Doc d, List<Match> matches) {
         this.d = d;
