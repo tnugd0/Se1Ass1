@@ -18,9 +18,8 @@ public class Doc {
         }
 
         for (int i = 0; i < bodyIndex.length; i++) {
-            this.title.add(Word.createWord(bodyIndex[i]));
+            this.body.add(Word.createWord(bodyIndex[i]));
         }
-
 
     }
 
@@ -44,7 +43,7 @@ public class Doc {
         int titlematch = 0;
         int bodymatch = 0;
 
-        if (this.title.size() != d.title.size()  || this.body.size() != d.body.size()  ) {
+        if (this.title.size() != d.title.size()  || this.body.size() != d.body.size()) {
             return false;
         }
 
@@ -67,6 +66,14 @@ public class Doc {
         }
 
         return  true;
+
+//        if(o==null){
+//            return false;
+//        }
+//        if(((Doc) o).getBody().equals(this.getBody()) && ((Doc) o).getTitle().equals(this.getTitle()) ){
+//            return true;
+//        }
+//        return false;
 
     }
 

@@ -1,270 +1,160 @@
 package engine;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.io.*;
-import java.lang.reflect.Array;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.util.HashSet;
 
 public class Word {
-    public static Set<String> stopWords = new HashSet<>();
 
-    public String prefix;
-    public String suffix;
-    public  String text;
-    public boolean validword = true;
-
-    public Word(String prefix, String suffix, String text) {
-        this.prefix = prefix;
-        this.suffix = suffix;
-        this.text = text;
+    public String textWord;
+    public Word(){
+        this.textWord = null;
     }
 
-    public Word(String text) {
-        this.text = text;
-        this.validword = false;
-        this.suffix = "";
-        this.prefix = "";
+    public static Set<String> stopWords = new HashSet<String>();
 
-    }
-
-
-
-    public static Word createWord(String rawText) {
-        int index = 0;
-        // find prefix
-        while (index < rawText.length() && !Character.isLetterOrDigit(rawText.charAt(index))) {
-            index++;
-        }
-        if (index == rawText.length())  return new Word (rawText);
-
-        String prefix = rawText.substring(0, index);
-        String text;
-        String suffix;
-        for (int i = index; i < rawText.length(); i++) {
-            char c = rawText.charAt(i);
-            if (Character.isDigit(c)) return new Word(rawText);
-            if (c == '\'') {
-                if (rawText.charAt(i+1) == 't') continue;
-                else return new Word(prefix,rawText.substring(index,i),rawText.substring(i));
-            }
-
-            if (!Character.isLetter(c) && c != '-') {
-                for (int j = i; j < rawText.length(); j++) {
-                    if (Character.isLetter(rawText.charAt(j))) return new Word( rawText);
-                }
-                text = rawText.substring(index, i);
-                suffix = rawText.substring(i);
-                return new Word(prefix, text, suffix);
-            }
-        }
-        text = rawText.substring(index);
-        return new Word(prefix, text, "");
-    }
-
-    public boolean isKeyword() {
-
+    public boolean isKeyword(){
+        boolean validword = checkWord();
         if (validword) {
             return true;
         }
+        return false;
+    }
 
-        if (this.text.length() == 0) {
-            return false;
+    public boolean checkWord() {
+        boolean validword = false;
+
+        Matcher m1 = Pattern.compile("[a-zA-Z]{1}").matcher(this.textWord);
+        Matcher m2 = Pattern.compile("[0-9]{1}").matcher(this.textWord);
+        Matcher m3 = Pattern.compile("\\s").matcher(this.textWord);
+
+
+        int m1Count = 0;
+
+
+        if(!m2.find()&&!m3.find()){
+            if(m1.find()&&!stopWords.contains(this.textWord.toLowerCase())){
+                validword= true;
+                return validword;
+            }
+        }else {
+            validword =  false;
+            return validword;
         }
+        return validword;
 
-        for (String words: stopWords) {
-            if (words == this.text) {
-                return true;
+
+
+
+    }
+    public String getPrefix(){
+        String prefix  = "";
+        Word thisWord = Word.createWord(this.textWord);
+        Matcher checkSpecial = Pattern.compile("^\'-").matcher(this.textWord);
+        Matcher checkFirstChar = Pattern.compile("^[\"(«<]").matcher(this.textWord);
+        if(checkSpecial.find()){
+            return prefix;
+        }
+        if(checkFirstChar.find()&&thisWord.isKeyword()){
+            prefix =  Character.toString(this.textWord.charAt(0));
+            return  prefix;
+        }
+        return prefix;
+
+    }
+    public String getSuffix(){
+        String suffix = "";
+        Word thisWord = Word.createWord(this.textWord);
+        Matcher matcher3 = Pattern.compile("^\'").matcher(this.textWord);
+        Matcher matcher1 = Pattern.compile("[^a-zA-Z0-9]$").matcher(this.textWord);
+        Matcher matcher2 = Pattern.compile("\'").matcher(this.textWord);
+
+        if(matcher3.find()){
+            return suffix;
+        }
+        if(matcher2.find()&&thisWord.isKeyword()){
+
+            suffix =  this.textWord.substring(this.textWord.indexOf("\'"));
+            return  suffix;
+        }
+        if(matcher1.find()&&thisWord.isKeyword()){
+            int index=0;
+            for(int i = this.textWord.length()-1;i>=0;i--){
+                if(Character.isLetter(this.textWord.charAt(i))){
+                    index= i;
+                    break;
+                }
+            }
+            suffix = this.textWord.substring(index+1);
+            return  suffix;
+
+        }
+        return suffix;
+    }
+
+    public String getText(){
+        Word thisWord = Word.createWord(this.textWord);
+        String prefix = thisWord.getPrefix();
+        String suffix = thisWord.getSuffix();
+        if(!thisWord.isKeyword()){
+            return this.textWord;
+        }
+        if(prefix!=null){
+            if(suffix!=null){
+                return this.textWord.substring(prefix.length(), this.textWord.length()-suffix.length());
+            }else{
+                return this.textWord.substring(prefix.length());
+            }
+        }else{
+            if(suffix!=null){
+                return this.textWord.substring(0, this.textWord.length()-suffix.length());
+            } else{
+                return this.textWord;
             }
         }
+    }
 
+    public boolean equals(Object o){
+        Word thisWord = Word.createWord(this.textWord);
+        if(thisWord.getText().toLowerCase().equals(((Word) o).getText().toLowerCase())){
+            return true;
+        }else return  false;
+    }
+
+    public String toString(){
+        return this.textWord;
+    }
+
+    public static Word createWord(String rawText){
+        Word newWord = new Word();
+        newWord.textWord = rawText;
+        return newWord;
+    }
+
+
+    public static boolean loadStopWords(String fileName) throws FileNotFoundException {
+        String url = fileName;
+        try {
+            stopWords=new HashSet<>();
+            FileInputStream fileInputStream = new FileInputStream(url);
+            Scanner scanner = new Scanner(fileInputStream);
+            while (scanner.hasNextLine()) {
+                stopWords.add(scanner.nextLine());
+            }
+            scanner.close();
+            fileInputStream.close();
+        }catch(Exception e){
+            return false;
+        }
         return true;
     }
 
-    public String getPrefix() {
-        return this.prefix;
-    }
 
-    public String getSuffix() {
-        return this.suffix;
-
-    }
-
-    public String getText() {
-
-        return this.text;
-    }
-
-    public boolean equals(Object o) {
-
-//        if (this.text.equalsIgnoreCase(o.toString())) {
-//            return true;
-//        }
-//        return false;
-
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof Word w )) {
-            return false;
-        }
-        return this.text.equalsIgnoreCase(w.text);
-
-    }
-    public void test(String rawText) {
-        String prefix = "";
-        String text = "";
-        String suffix = "";
-
-
-        int index = 0;
-        for (int i = 0 ;i < rawText.length(); i++) {
-            if (Character.isDigit(rawText.charAt(i))) {
-                break;
-            }
-            if (!Character.isLetter(rawText.charAt(i))) {
-                prefix += rawText.charAt(i);
-                index ++;
-            }
-        }
-
-        if (index == rawText.length()) {
-            System.out.println("Invalid");
-        }
-        for (int i = index; i < rawText.length(); i++) {
-            if (Character.isDigit(rawText.charAt(i))) {
-
-//                return null;
-                break;
-            }
-            if (rawText.charAt(i) == '\'') {
-                if (rawText.charAt(i +1) == 's') {
-                    continue;
-                }
-
-                System.out.println(index);
-                text = rawText.substring(index,i+2);
-                suffix = rawText.substring(i+2);
-//              return new Word(prefix,text,suffix);
-                break;
-
-            }
-
-            if (rawText.charAt(i) == '-') {
-//                text = rawText.substring(index)
-                if (!Character.isLetter(rawText.charAt(i+1))) {
-                    text = rawText.substring(index, i +1);
-                    suffix = rawText.substring(i+1);
-
-                }
-                else {
-                    text = rawText.substring(index);
-                }
-
-            }
-
-            if (!Character.isLetter(rawText.charAt(i))) {
-
-            }
-
-        }
-
-        System.out.println("prefix " + prefix);
-        System.out.println("text " + text);
-        System.out.println("suffix " + suffix);
-
-    }
-
-
-
-//    public static Word createWord(String rawText) {
-//        String prefix = "";
-//        String text = "";
-//        String suffix = "";
-//
-//
-//        int index = 0;
-//        for (int i = 0 ;i < rawText.length(); i++) {
-//            if (!Character.isLetterOrDigit(rawText.charAt(i))) {
-//                prefix += rawText.charAt(i);
-//            }
-//            if (Character.isLetterOrDigit(rawText.charAt(i))) {
-//                break;
-//            }
-//        }
-//
-//        if (prefix.length() != 0 ) {
-//            if (prefix.length() != 1) {
-//                index = prefix.length() -1;
-//            }
-//            else {
-//                index = prefix.length();
-//
-//            }
-//        }
-//        for (int i = index; i < rawText.length(); i++) {
-//            if (Character.isDigit(rawText.charAt(i))) {
-//
-//                return null;
-//            }
-//            if (rawText.charAt(i) == '\'') {
-//                if (rawText.charAt(i +1) == 's') {
-//                    continue;
-//                }
-//
-//                else {
-//                    text = rawText.substring(index,i);
-//                    suffix = rawText.substring(i);
-//                    return new Word(prefix,text,suffix);
-//                }
-//            }
-//
-//            if (rawText.charAt(i) == '-') {
-////                text = rawText.substring(index)
-//                if (!Character.isLetter(rawText.charAt(i+1))) {
-//                    text = rawText.substring(index, i +1);
-//                    suffix = rawText.substring(i+1);
-//
-//                }
-//                else {
-//                    text = rawText.substring(index);
-//                }
-//
-//            }
-//
-//        }
-//        text = rawText.substring(index);
-//        return new Word(prefix, text, suffix);
-
-//    }
-
-    public static boolean loadStopWords(String fileName) {
-        try {
-
-            File file = new File(fileName);
-            FileInputStream fis = new FileInputStream(file);
-            byte[] data = new byte[(int) file.length()];
-            fis.read(data);
-            fis.close();
-
-            String stopword = new String(data, StandardCharsets.UTF_8);
-            stopWords.add(stopword);
-            return true;
-
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-
-
-
-    @Override
-    public String toString() {
-        return "Word{" +
-                "prefix='" + prefix + '\'' +
-                ", suffix='" + suffix + '\'' +
-                ", text='" + text + '\'' +
-                '}';
-    }
 }
+
+
