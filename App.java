@@ -1,4 +1,4 @@
-package engine;
+package a1_2001040219;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -134,22 +134,22 @@ public class App {
                 System.out.println("Engine.search(): incorrect match count (actual: " + x + ", expected: " + matchCounts[i]);
             }
         }
-        String tmpTitle = results.get(0).getDocs().getTitle().toString();
+        String tmpTitle = results.get(0).getDoc().getTitle().toString();
         if (!tmpTitle.equals("[System, context, and, interactions]")) {
             System.out.println("Engine.search(): incorrect first result '" + tmpTitle + "' (expected '[System, context, and, interactions]'");
         }
-        tmpTitle = results.get(1).getDocs().getTitle().toString();
+        tmpTitle = results.get(1).getDoc().getTitle().toString();
         if (!tmpTitle.equals("[Design, patterns]")) {
             System.out.println("Engine.search(): incorrect second result '" + tmpTitle + "' (expected '[Design, patterns]'");
         }
         // Testing HTML highlights
         Scanner sc = new Scanner(new File("testCases.html"));
         String firstResultHTML = sc.nextLine();
-        if (!firstResultHTML.equals(results.get(0).htmlHighLight().trim())) {
+        if (!firstResultHTML.equals(results.get(0).htmlHighlight().trim())) {
             System.out.println("Result.htmlHighlight(): incorrect output for first result");
         }
         String secondResultHTML = sc.nextLine();
-        if (!secondResultHTML.equals(results.get(1).htmlHighLight().trim())) {
+        if (!secondResultHTML.equals(results.get(1).htmlHighlight().trim())) {
             System.out.println("Result.htmlHighlight(): incorrect output for second result");
         }
         String html = e.htmlResult(results).trim(); // ranked result in simple HTML format

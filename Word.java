@@ -1,4 +1,5 @@
-package engine;
+package a1_2001040219;
+import java.io.File;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -7,16 +8,17 @@ import java.util.regex.Pattern;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+
 import java.util.HashSet;
 
 public class Word {
 
+    public static Set<String> stopWords = new HashSet<>();
     public String textWord;
+
     public Word(){
         this.textWord = null;
     }
-
-    public static Set<String> stopWords = new HashSet<String>();
 
     public boolean isKeyword(){
         boolean validword = checkWord();
@@ -29,16 +31,12 @@ public class Word {
     public boolean checkWord() {
         boolean validword = false;
 
-        Matcher m1 = Pattern.compile("[a-zA-Z]{1}").matcher(this.textWord);
-        Matcher m2 = Pattern.compile("[0-9]{1}").matcher(this.textWord);
-        Matcher m3 = Pattern.compile("\\s").matcher(this.textWord);
+        Matcher checkletter = Pattern.compile("[a-zA-Z]").matcher(this.textWord);
+        Matcher checknumber = Pattern.compile("[0-9]").matcher(this.textWord);
+        Matcher checkspace = Pattern.compile("\\s").matcher(this.textWord);
 
-
-        int m1Count = 0;
-
-
-        if(!m2.find()&&!m3.find()){
-            if(m1.find()&&!stopWords.contains(this.textWord.toLowerCase())){
+        if(!checknumber.find()&&!checkspace.find()){
+            if(checkletter.find()&&!stopWords.contains(this.textWord.toLowerCase())){
                 validword= true;
                 return validword;
             }
@@ -48,19 +46,15 @@ public class Word {
         }
         return validword;
 
-
-
-
     }
     public String getPrefix(){
         String prefix  = "";
-        Word thisWord = Word.createWord(this.textWord);
-        Matcher checkSpecial = Pattern.compile("^\'-").matcher(this.textWord);
+        Matcher checkSpecial = Pattern.compile("^'-").matcher(this.textWord);
         Matcher checkFirstChar = Pattern.compile("^[\"(«<]").matcher(this.textWord);
         if(checkSpecial.find()){
             return prefix;
         }
-        if(checkFirstChar.find()&&thisWord.isKeyword()){
+        if(checkFirstChar.find()&&Word.createWord(this.textWord).isKeyword()){
             prefix =  Character.toString(this.textWord.charAt(0));
             return  prefix;
         }
@@ -69,61 +63,87 @@ public class Word {
     }
     public String getSuffix(){
         String suffix = "";
-        Word thisWord = Word.createWord(this.textWord);
-        Matcher matcher3 = Pattern.compile("^\'").matcher(this.textWord);
-        Matcher matcher1 = Pattern.compile("[^a-zA-Z0-9]$").matcher(this.textWord);
-        Matcher matcher2 = Pattern.compile("\'").matcher(this.textWord);
+        int index = 0;
+        String word = this.textWord;
+        Matcher checksemi = Pattern.compile("^'").matcher(word);
+        Matcher checkletter = Pattern.compile("[^a-zA-Z0-9]$").matcher(word);
+        Matcher checksemicolum = Pattern.compile("'").matcher(word);
 
-        if(matcher3.find()){
+        if(checksemi.find()){
             return suffix;
         }
-        if(matcher2.find()&&thisWord.isKeyword()){
+        if(checksemicolum.find()&&Word.createWord(word).isKeyword()){
+            index = word.indexOf("'");
 
-            suffix =  this.textWord.substring(this.textWord.indexOf("\'"));
+            suffix =  word.substring(index);
             return  suffix;
         }
-        if(matcher1.find()&&thisWord.isKeyword()){
-            int index=0;
-            for(int i = this.textWord.length()-1;i>=0;i--){
-                if(Character.isLetter(this.textWord.charAt(i))){
+        if(checkletter.find()&&Word.createWord(word).isKeyword()){
+//            int index=0;
+            for(int i = word.length()-1;i>=0;i--){
+                if(Character.isLetter(word.charAt(i))){
                     index= i;
                     break;
                 }
             }
-            suffix = this.textWord.substring(index+1);
+            suffix = word.substring(index+1);
             return  suffix;
 
         }
         return suffix;
     }
 
+    public int getSufLen() {
+        return this.getSuffix().length();
+    }
+
+
+    public int getPreLen() {
+        return this.getPrefix().length();
+    }
+
     public String getText(){
         Word thisWord = Word.createWord(this.textWord);
-        String prefix = thisWord.getPrefix();
-        String suffix = thisWord.getSuffix();
+        String prefix = null;
+        String suffix = null;
+        String word = null;
+        String finalWord = null;
+        String root = this.textWord;
         if(!thisWord.isKeyword()){
-            return this.textWord;
+            return root;
         }
-        if(prefix!=null){
-            if(suffix!=null){
-                return this.textWord.substring(prefix.length(), this.textWord.length()-suffix.length());
+        if(thisWord.getPrefix()!=null){
+            if(thisWord.getSuffix()!=null){
+
+                // no prefix and suffix
+//                prefix = null;
+//                suffix = null;
+                word = root.substring(thisWord.getPreLen(), root.length()-thisWord.getSufLen());
+                finalWord =  word;
+                return finalWord;
             }else{
-                return this.textWord.substring(prefix.length());
+
+
+                word = root.substring(thisWord.getPreLen());
+                return word;
             }
         }else{
-            if(suffix!=null){
-                return this.textWord.substring(0, this.textWord.length()-suffix.length());
-            } else{
-                return this.textWord;
+
+            if(thisWord.getSuffix()!=null){
+                word =  root.substring(0, root.length()-thisWord.getPreLen());
+                return word;
             }
+            word = root;
+            return word;
         }
     }
 
     public boolean equals(Object o){
         Word thisWord = Word.createWord(this.textWord);
-        if(thisWord.getText().toLowerCase().equals(((Word) o).getText().toLowerCase())){
-            return true;
-        }else return  false;
+        if(!thisWord.getText().equalsIgnoreCase(((Word) o).getText())){
+            return false;
+        }
+        return  true;
     }
 
     public String toString(){
@@ -137,17 +157,16 @@ public class Word {
     }
 
 
-    public static boolean loadStopWords(String fileName) throws FileNotFoundException {
-        String url = fileName;
+    public static boolean loadStopWords(String fileName) {
+
         try {
-            stopWords=new HashSet<>();
-            FileInputStream fileInputStream = new FileInputStream(url);
-            Scanner scanner = new Scanner(fileInputStream);
-            while (scanner.hasNextLine()) {
-                stopWords.add(scanner.nextLine());
+
+            File file = new File(fileName);
+            Scanner reader = new Scanner(file);
+            while (reader.hasNextLine()) {
+                stopWords.add(reader.nextLine());
             }
-            scanner.close();
-            fileInputStream.close();
+
         }catch(Exception e){
             return false;
         }

@@ -1,107 +1,96 @@
-package engine;
+package a1_2001040219;
 
 import java.util.List;
 
 public class Result implements Comparable<Result> {
-    private Doc d;
-    private List<Match> matches;
-//    private int matchCount = matches.size();
-
-
-    public Result(Doc d, List<Match> matches) {
-        this.d = d;
+    public Doc d;
+    public List<Match> matches;
+    public Result(Doc d, List<Match> matches){
+        this.d =d;
         this.matches = matches;
     }
-
-    public Doc getDocs() {
-        return this.d;
-    }
-
-    public List<Match> getMatches() {
-
+    public List<Match> getMatches(){
         return this.matches;
     }
-
-
-    public int getTotalFrequency() {
-        int count = 0;
-        for (Match match : matches) {
-            count += match.getFreq();
+    public Doc getDoc(){
+        return this.d;
+    }
+    public int getTotalFrequency(){
+        int total = 0;
+        for(Match match :this.matches){
+            total += match.getFreq();
         }
+        return total;
 
-        return count;
 
     }
-
-    public double getAverageFirstIndex() {
-        int sum = 0;
-//        int count = 0;
-        for (Match match : matches) {
-            sum += match.getFirstIndex();
-//            count++;
+    public double getAverageFirstIndex(){
+        double total =0;
+        for(Match match : this.matches){
+            total = total + match.getFirstIndex();
         }
-
-        return sum / this.matchesCount();
+        return total/(this.getMatchesCount());
     }
-
-    public String htmlHighLight() {
+    public String htmlHighlight(){
         List<Word> titleList = this.d.getTitle();
         List<Word> bodyList = this.d.getBody();
 
-        for (int index = 0; index < this.matches.size(); index++) {
-            if (this.matches.get(index).getFreq() > 0) {
-                for (Word title : titleList) {
-                    if (this.matches.get(index).getWord().equals(title)) {
-                        titleList.set(titleList.indexOf(title), Word.createWord(title.getPrefix() + "<u>" + title.getText() + "</u>" + title.getSuffix()));
+        for(int index = 0; index< this.matches.size(); index+=1){
+            if(this.matches.get(index).getFreq()>0){
+                for (int i = 0; i < titleList.size(); i++) {
+                    if(this.matches.get(index).getWord().equals(titleList.get(i))){
+                        titleList.set(titleList.indexOf(titleList.get(i)), Word.createWord(titleList.get(i).getPrefix()+"<u>"+titleList.get(i).getText()+"</u>"+titleList.get(i).getSuffix()));
                     }
                 }
-                for (Word body : bodyList) {
-                    if (this.matches.get(index).getWord().equals(body)) {
-                        bodyList.set(bodyList.indexOf(body), Word.createWord(body.getPrefix() + "<u>" + body.getText() + "</u>" + body.getSuffix()));
+
+                for (int i = 0; i < bodyList.size(); i++) {
+                    if(this.matches.get(index).getWord().equals(bodyList.get(i))){
+                        bodyList.set(bodyList.indexOf(bodyList.get(i)), Word.createWord(bodyList.get(i).getPrefix()+"<b>"+bodyList.get(i).getText()+"</b>"+bodyList.get(i).getSuffix()));
                     }
                 }
             }
         }
 
-        String title = "";
-        for (Word word : titleList) {
-            title = title + word.toString() + " ";
+        StringBuilder title= new StringBuilder();
+        for (int i = 0; i < titleList.size(); i++) {
+            title.append(titleList.get(i).toString()).append(" ");
         }
-        String body = "";
-        for (Word word : bodyList) {
-            body = body + word.toString() + " ";
+        StringBuilder body= new StringBuilder();
+        for (int i = 0; i < bodyList.size(); i++) {
+            body.append(bodyList.get(i).toString()).append(" ");
         }
 
-        return String.format("<h3>%s</h3><p>%s</p>".format(title.trim(), body.trim()));
+
+        String returnString = String.format("<h3>%s</h3><p>%s</p>",title.toString().trim(),body.toString().trim());
+        return returnString;
     }
 
 
-    public int matchesCount() {
+    public int getMatchesCount() {
         return this.matches.size();
     }
 
-
-    public int compareTo(Result o) {
-
-        if (this.matchesCount() > o.matchesCount()) {
-            return 1;
-        }
-        if (this.matchesCount() < o.matchesCount()) {
+    public int compareTo(Result o){
+        if(this.getMatchesCount()>o.getMatches().size()){
             return -1;
         }
-        if (this.getTotalFrequency() > o.getTotalFrequency()) {
+        if(this.getMatchesCount()<o.getMatches().size()){
             return 1;
         }
-        if (this.getTotalFrequency() < o.getTotalFrequency()) {
+        if(this.getTotalFrequency()>o.getTotalFrequency()){
             return -1;
         }
-
-        if (this.getAverageFirstIndex() > o.getAverageFirstIndex()) {
+        if(this.getTotalFrequency()<o.getTotalFrequency()){
             return 1;
         }
-
-        return -1;
+        if(this.getAverageFirstIndex()>o.getAverageFirstIndex()){
+            return 1;
+        }
+        if(this.getAverageFirstIndex()<o.getAverageFirstIndex()){
+            return -1;
+        }
+        return 0;
     }
-
-
 }
+
+

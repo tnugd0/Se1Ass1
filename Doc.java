@@ -1,79 +1,47 @@
-package engine;
+package a1_2001040219;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Doc {
-    private List<Word> title = new ArrayList<>();
-    private  List<Word> body = new ArrayList<>();
+    public String content;
+    List<Word> title;
+    List<Word> body;
 
-    public Doc(String content) {
-        String [] wordList  = content.split("\n");
-
-        String [] titleIndex = wordList[0].split(" ");
-        String [] bodyIndex = wordList[1].split(" ");
-
-        for (int i = 0; i < titleIndex.length; i++) {
-            this.title.add(Word.createWord(titleIndex[i]));
-        }
-
-        for (int i = 0; i < bodyIndex.length; i++) {
-            this.body.add(Word.createWord(bodyIndex[i]));
-        }
-
+    public Doc(String content){
+        this.content = content;
     }
 
-
-
-    public List<Word> getTitle()
-    {
+    public List<Word> getTitle(){
+        this.title= new LinkedList<>();
+        String[] wordsList = this.content.split("\n")[0].split("\\s");
+        this.title = Arrays.stream(wordsList).map(Word::createWord).collect(Collectors.toList());
         return this.title;
     }
 
-    public List<Word> getBody() {
+    public List<Word> getBody(){
+        this.body= new LinkedList<>();
+        String[] wordsList = this.content.split("\n")[1].split("\\s");
+        this.body = Arrays.stream(wordsList).map(Word::createWord).collect(Collectors.toList());
         return this.body;
-
     }
 
     public boolean equals(Object o){
-        if (!(o instanceof  Doc d)) {
-            return false;
-        }
-
-        int titlematch = 0;
-        int bodymatch = 0;
-
-        if (this.title.size() != d.title.size()  || this.body.size() != d.body.size()) {
-            return false;
-        }
-
-
-        for (int i = 0; i < this.title.size(); i++) {
-            if (this.title.get(i).equals(d.title.get(i))) {
-                titlematch += 1;
-            }
-        }
-
-
-        for (int i = 0; i < this.body.size(); i++) {
-            if (this.body.get(i).equals(d.body.get(i))) {
-                bodymatch += 1;
-            }
-        }
-
-        if (titlematch == this.title.size() && bodymatch == this.body.size()) {
+        if(o!=null){
             return true;
         }
 
-        return  true;
+        if (o instanceof Doc d) {
+            if(!((Doc) o).getBody().equals(this.getBody()) && ((Doc) o).getTitle().equals(this.getTitle()) ){
+                return false;
+            }
+        }
 
-//        if(o==null){
-//            return false;
-//        }
-//        if(((Doc) o).getBody().equals(this.getBody()) && ((Doc) o).getTitle().equals(this.getTitle()) ){
-//            return true;
-//        }
-//        return false;
+
+        return true;
 
     }
 

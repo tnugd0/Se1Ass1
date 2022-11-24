@@ -1,73 +1,55 @@
-package engine;
+package a1_2001040219;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Engine {
 
-    private String dirname;
-    public Engine(){
-        this.dirname = null;
-    }
+    private Doc[] docs;
     public int loadDocs(String dirname) {
         File folder = new File(dirname);
-        File[] files = folder.listFiles();
-        this.dirname = dirname;
-        return files.length;
+        File[] file = folder.listFiles();
+        this.docs = new Doc[file.length];
+        for (int i = 0; i < file.length; i++) {
+            String textContent = null;
+            try {
+                textContent = Files.readString(file[i].getAbsoluteFile().toPath());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            this.docs[i] = new Doc(textContent);
+        }
+
+        return file.length;
     }
 
-    public Doc[] getDocs() throws FileNotFoundException {
-        File folder = new File(this.dirname);
-        File[] files = folder.listFiles();
-        Doc[] docsList = new Doc[files.length];
-        for(int i =0;i<files.length;i++){
-            String content ="";
-            FileInputStream fileInputStream = new FileInputStream(files[i].getAbsolutePath());
-            Scanner scanner = new Scanner(fileInputStream);
-            while (scanner.hasNextLine()) {
-                content = content + scanner.nextLine()+"\n";
-            }
-            Doc newDoc = new Doc(content);
-            docsList[i] = newDoc;
-        }
-        return docsList;
-
+    public Doc[] getDocs() {
+        return this.docs;
     }
 
-    public List<Result> search(Query q) throws FileNotFoundException {
-        List<Result> results = new ArrayList<Result>();
-        Doc[] listDocs = this.getDocs();
-        for(Doc doc : listDocs){
-            List<Match> matches = q.matchAgainst(doc);
-
-            if(matches.size()>0){
-                Result newResult = new Result(doc, matches);
-                results.add(newResult);
+    public List<Result> search(Query q) {
+        List<Result> results = new LinkedList<>();
+        for (int i = 0; i < this.docs.length; i++) {
+            List<Match> matches = q.matchAgainst(this.docs[i]);
+            if (matches.size() > 0) {
+                results.add(new Result(this.docs[i],q.matchAgainst(this.docs[i])));
             }
-
         }
-        Collections.sort(results);
-        return results;
-
+        List<Result> result =  results.stream().sorted().collect(Collectors.toList());
+        return result;
     }
     public String htmlResult(List<Result> results) {
-        String returnBody = "";
+        StringBuilder returnBody = new StringBuilder();
 
         for (Result result: results) {
-            returnBody += result.htmlHighLight();
+            returnBody.append(result.htmlHighlight());
         }
-
-
-        return returnBody;
+        return returnBody.toString();
     }
+
 
 
 }
